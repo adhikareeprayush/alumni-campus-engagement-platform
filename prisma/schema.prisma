@@ -1,0 +1,330 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ALUMNI
+  STUDENT
+  ADMIN
+  FACULTY
+}
+
+enum Program {
+  BCT
+  BEX
+  BIT
+  BCE
+  BME
+  BEE
+  BAG
+  BAM
+  OTHER
+}
+
+enum EventType {
+  GUEST_LECTURE
+  REUNION
+  WEBINAR
+  WORKSHOP
+  OTHER
+}
+
+enum RsvpStatus {
+  ATTENDING
+  NOT_ATTENDING
+  MAYBE
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  INTERNSHIP
+  CONTRACT
+  FREELANCE
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  SHORTLISTED
+  REJECTED
+}
+
+// ---------------------------------------------------------------------------
+// Core user identity
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String?   // null for OAuth users
+  role          Role      @default(ALUMNI)
+  emailVerified DateTime?
+  image         String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  alumniProfile   AlumniProfile?
+  studentProfile  StudentProfile?
+  accounts        Account[]
+  sessions        Session[]
+  postedJobs      JobPosting[]
+  jobApplications JobApplication[]
+  eventRsvps      EventRsvp[]
+  auditLogs       AuditLog[]
+  announcements   Announcement[]
+  facultyPrograms FacultyManagedProgram[]
+}
+
+// Programs a faculty user may view/manage (alumni & students in those programs only).
+// Admins have no rows here and see everything.
+model FacultyManagedProgram {
+  id        String   @id @default(cuid())
+  userId    String
+  program   Program
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, program])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Alumni profile
+// ---------------------------------------------------------------------------
+
+model AlumniProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batchYear       Int
+  program         Program
+  rollNumber      String?
+  currentCompany  String?
+  currentJobTitle String?
+  currentLocation String?
+  district        String?
+  province        String?
+  country         String    @default("Nepal")
+  linkedinUrl     String?
+  githubUrl       String?
+  portfolioUrl    String?
+  bio             String?   @db.Text
+  isVerified      Boolean   @default(false)
+  isEmployed      Boolean   @default(false)
+  verifiedAt      DateTime?
+  verifiedById    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  skills     AlumniSkill[]
+  jobHistory JobHistory[]
+  education  Education[]
+}
+
+model JobHistory {
+  id          String        @id @default(cuid())
+  profileId   String
+  profile     AlumniProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  company     String
+  jobTitle    String
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean       @default(false)
+  description String?       @db.Text
+  createdAt   DateTime      @default(now())
+}
+
+model Education {
+  id          String        @id @default(cuid())
+  profileId   String
+  profile     AlumniProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  institution String
+  degree      String
+  field       String?
+  startYear   Int
+  endYear     Int?
+  isOngoing   Boolean       @default(false)
+}
+
+model Skill {
+  id     String        @id @default(cuid())
+  name   String        @unique
+  alumni AlumniSkill[]
+}
+
+model AlumniSkill {
+  profileId String
+  skillId   String
+  profile   AlumniProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skill     Skill         @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, skillId])
+}
+
+// ---------------------------------------------------------------------------
+// Student profile
+// ---------------------------------------------------------------------------
+
+model StudentProfile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batchYear  Int
+  program    Program
+  rollNumber String?
+}
+
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String?   @db.Text
+  eventType   EventType
+  venue       String?
+  onlineLink  String?
+  startDate   DateTime
+  endDate     DateTime?
+  isPublished Boolean   @default(false)
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  rsvps EventRsvp[]
+}
+
+model EventRsvp {
+  id        String     @id @default(cuid())
+  eventId   String
+  userId    String
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    RsvpStatus @default(ATTENDING)
+  attended  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+
+  @@unique([eventId, userId])
+}
+
+// ---------------------------------------------------------------------------
+// Job & Internship portal
+// ---------------------------------------------------------------------------
+
+model JobPosting {
+  id          String    @id @default(cuid())
+  title       String
+  company     String
+  location    String?
+  type        JobType
+  description String?   @db.Text
+  applyLink   String?
+  deadline    DateTime?
+  isActive    Boolean   @default(true)
+  postedById  String
+  postedBy    User      @relation(fields: [postedById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  applications JobApplication[]
+}
+
+model JobApplication {
+  id        String            @id @default(cuid())
+  jobId     String
+  userId    String
+  job       JobPosting        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String?           @db.Text
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+
+  @@unique([jobId, userId])
+}
+
+// ---------------------------------------------------------------------------
+// Announcements
+// ---------------------------------------------------------------------------
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  isPublished Boolean  @default(false)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Audit log (triggers will also write here via MySQL stored procs)
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // CREATE | UPDATE | DELETE | LOGIN | VERIFY
+  entity    String   // table/model name
+  entityId  String?
+  oldValues Json?
+  newValues Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// NextAuth.js v5 required tables
+// ---------------------------------------------------------------------------
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

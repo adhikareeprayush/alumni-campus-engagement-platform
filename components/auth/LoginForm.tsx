@@ -26,6 +26,7 @@ export function LoginForm() {
       const result = await loginUser({
         email: formData.get("email") as string,
         password: formData.get("password") as string,
+        callbackUrl,
       });
 
       if (result?.error) {

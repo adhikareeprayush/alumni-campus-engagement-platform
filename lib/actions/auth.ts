@@ -65,13 +65,33 @@ export async function registerUser(formData: RegisterInput) {
   return { success: true };
 }
 
-export async function loginUser(formData: { email: string; password: string }) {
+export async function loginUser(formData: {
+  email: string;
+  password: string;
+  callbackUrl?: string;
+}) {
   try {
-    await signIn("credentials", {
+    // `redirect: false` avoids throwing `redirect()` from the server action. On Vercel,
+    // the redirect + RSC boundary could leave the session cookie unset while the client
+    // still navigates — then /dashboard sends you back to /login?callbackUrl=...
+    const result = await signIn("credentials", {
       email: formData.email,
       password: formData.password,
-      redirectTo: "/dashboard",
+      redirect: false,
+      redirectTo: formData.callbackUrl ?? "/dashboard",
     });
+
+    const url = typeof result === "string" ? result : "";
+    if (url.includes("error=CredentialsSignin") || url.includes("error=credentials")) {
+      return { error: "Invalid email or password." };
+    }
+    if (url.includes("error=Configuration")) {
+      return { error: "Server configuration error. Check AUTH_SECRET and AUTH_URL on the host." };
+    }
+    if (url.includes("error=")) {
+      return { error: "Something went wrong. Please try again." };
+    }
+
     return { success: true };
   } catch (error) {
     if (error instanceof AuthError) {

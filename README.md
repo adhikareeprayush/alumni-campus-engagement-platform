@@ -35,6 +35,8 @@ Create a `.env` file in the project root (this repo ignores `.env*` in git):
 | `AUTH_SECRET`   | Yes      | Secret for signing sessions/JWT. Generate with `openssl rand -base64 32`. |
 | `AUTH_URL`      | Deploy   | Public site URL, e.g. `https://your-domain.com` (helps NextAuth in production). |
 
+**Vercel (or any production host):** In the project **Settings → Environment Variables**, set at least `DATABASE_URL`, **`AUTH_SECRET`** (required in production for Auth.js), and **`AUTH_URL`** to your live origin with no trailing path, e.g. `https://alumini-tracker.prayushadhikari.com.np`. Redeploy after changing env vars. If login loops back to `/login?callbackUrl=/dashboard`, the session cookie was not set — usually missing or wrong `AUTH_SECRET` / `AUTH_URL`, or the DB is unreachable from the serverless runtime (check Aiven allows connections from the internet).
+
 Example `DATABASE_URL`:
 
 ```env
@@ -130,6 +132,10 @@ This project may use newer Next.js APIs than older tutorials. If something behav
 - **`PrismaClient` / module errors** — Run `npx prisma generate` (or `npm install`, which triggers generate).
 - **DB connection errors** — Verify `DATABASE_URL`, that MariaDB/MySQL is running, and that the database exists. The adapter enables `allowPublicKeyRetrieval` for typical local setups.
 - **Auth / session issues** — Ensure `AUTH_SECRET` is set and stable across restarts in dev.
+- **`The table User does not exist` (P2021) when seeding** — Apply migrations before seed: `npx prisma migrate deploy` (or `npx prisma migrate dev` locally).
+- **Aiven / managed MySQL: `sql_require_primary_key` during migrate** — The initial migration creates `VerificationToken` with a composite primary key so it satisfies strict hosts.
+- **`Table 'User' already exists` after `migrate resolve --rolled-back`** — `resolve` does not drop tables. Run the SQL in `prisma/drop-all-for-fresh-migrate.sql` on the database (wipes data + `_prisma_migrations`), then `npx prisma migrate deploy` (no `resolve` needed). From your machine (uses `.env` `DATABASE_URL`): `npx prisma db execute --file prisma/drop-all-for-fresh-migrate.sql`. Aiven often has no in-browser SQL editor for MySQL; use that command or a desktop client (TablePlus, DBeaver, `mysql` CLI) with the host/port/user from the Aiven service **Overview**.
+- **Local DB created before the `VerificationToken` primary-key fix** — If `migrate deploy` reports the initial migration was modified after apply, either run `npx prisma migrate reset` (wipes data) or add the primary key manually, then follow [Prisma’s migration repair docs](https://www.prisma.io/docs/guides/migrate/production-troubleshooting) to align `_prisma_migrations` with the team.
 
 ---
 

@@ -68,6 +68,7 @@ Create a `.env` in the project root (ignored by git):
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | MySQL/MariaDB URL (below). |
+| `DATABASE_SSL` | Optional | `true` / `1` forces TLS for the MariaDB driver; `false` / `0` disables TLS overrides (local Docker). Hostnames ending in `.aivencloud.com` enable TLS automatically unless disabled here or via URL params. |
 | `AUTH_SECRET` | Yes | Session/JWT signing secret (`openssl rand -base64 32`). |
 | `AUTH_URL` | Production | Public origin, e.g. `https://your-domain.com` (no trailing path). |
 
@@ -168,6 +169,7 @@ Open [http://localhost:3000](http://localhost:3000). Sign in at `/login` or regi
 - **Prisma client errors** — `npx prisma generate` or reinstall (`postinstall` generates).
 - **DB connection** — Check `DATABASE_URL`, server running, database exists; adapter allows typical local MySQL settings.
 - **Build fails on `/` with pool timeout / `ENOTFOUND` (managed MySQL e.g. Aiven)** — The marketing homepage loads live counts **per request** (not at build time). If build still fails elsewhere on DB calls, ensure CI/production **`DATABASE_URL`** uses the current hostname from your provider’s dashboard (Aiven hostnames can change after restores); unreachable DB during build otherwise yields Prisma pool timeouts.
+- **Deployed site shows “server error” / digest IDs with no detail** — Often Prisma failing at runtime (TLS required). **`DATABASE_URL`** must reach your DB from Vercel (etc.). For **Aiven**, TLS is enabled automatically when the host ends with `.aivencloud.com`; for other clouds without query hints, set **`DATABASE_SSL=true`**. Local MySQL without TLS: set **`DATABASE_SSL=false`** if you added `ssl-mode` to the URL by mistake.
 - **Auth** — Stable `AUTH_SECRET` across restarts.
 - **`User` table missing when seeding** — Migrate first: `npx prisma migrate deploy` or `migrate dev`.
 - **Strict managed MySQL (`sql_require_primary_key`)** — Initial migrations use composite PKs where required for hosts like Aiven.

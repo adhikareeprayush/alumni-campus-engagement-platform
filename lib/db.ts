@@ -3,17 +3,60 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
 function parseDatabaseUrl(url: string) {
   const parsed = new URL(url);
+  const database = parsed.pathname.replace(/^\//, "").split("/")[0] || "";
+
+  const params = parsed.searchParams;
+  const sslMode = (params.get("ssl-mode") || params.get("sslmode") || "").toUpperCase();
+  const sslParam = params.get("ssl")?.toLowerCase();
+
+  /** Managed MySQL hosts typically require TLS (plain handshake fails or closes). */
+  let ssl: boolean | { rejectUnauthorized?: boolean } | undefined;
+
+  const envSsl = process.env.DATABASE_SSL?.toLowerCase();
+  if (envSsl === "false" || envSsl === "0") {
+    ssl = undefined;
+  } else if (envSsl === "true" || envSsl === "1") {
+    ssl = { rejectUnauthorized: true };
+  } else {
+    const explicitOff =
+      sslMode === "DISABLED" ||
+      sslMode === "DISABLE" ||
+      sslParam === "false" ||
+      sslParam === "0";
+    const explicitOn =
+      sslMode === "REQUIRED" ||
+      sslMode === "REQUIRE" ||
+      sslMode === "VERIFY_CA" ||
+      sslMode === "VERIFY_IDENTITY" ||
+      sslParam === "true" ||
+      sslParam === "1";
+
+    const managedTlsHost =
+      parsed.hostname.endsWith(".aivencloud.com") ||
+      /\.aiven\.io$/i.test(parsed.hostname);
+
+    if (!explicitOff && (explicitOn || managedTlsHost)) {
+      ssl = { rejectUnauthorized: true };
+    }
+  }
+
   return {
     host: parsed.hostname,
-    port: parseInt(parsed.port || "3306", 10),
+    port: Number.parseInt(parsed.port || "3306", 10),
     user: parsed.username,
     password: parsed.password,
-    database: parsed.pathname.replace("/", ""),
+    database,
+    ...(ssl ? { ssl } : {}),
   };
 }
 
 function createPrismaClient() {
-  const connectionConfig = parseDatabaseUrl(process.env.DATABASE_URL!);
+  const rawUrl = process.env.DATABASE_URL;
+  if (!rawUrl?.trim()) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  const connectionConfig = parseDatabaseUrl(rawUrl);
   const adapter = new PrismaMariaDb({
     ...connectionConfig,
     allowPublicKeyRetrieval: true,

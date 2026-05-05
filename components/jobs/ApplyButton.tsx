@@ -17,8 +17,8 @@ export function ApplyButton({ jobId, hasApplied, isActive }: Props) {
 
   if (hasApplied) {
     return (
-      <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium">
-        <CheckCircle2 className="h-4 w-4" /> Applied
+      <div className="flex items-center gap-2 text-sm font-medium text-teal-400">
+        <CheckCircle2 className="h-4 w-4" aria-hidden /> Applied
       </div>
     );
   }
@@ -32,13 +32,9 @@ export function ApplyButton({ jobId, hasApplied, isActive }: Props) {
   };
 
   return (
-    <Button
-      className="bg-indigo-600 hover:bg-indigo-700"
-      onClick={handleApply}
-      disabled={isPending || !isActive}
-    >
-      {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-      Apply via Portal
+    <Button className="bg-teal-600 hover:bg-teal-500" onClick={handleApply} disabled={isPending || !isActive}>
+      {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : null}
+      Apply via portal
     </Button>
   );
 }

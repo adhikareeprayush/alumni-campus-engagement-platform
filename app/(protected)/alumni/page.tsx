@@ -3,10 +3,13 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AlumniCard } from "@/components/alumni/AlumniCard";
 import { AlumniFilters } from "@/components/alumni/AlumniFilters";
+import { AlumniFiltersMobile } from "@/components/alumni/AlumniFiltersMobile";
 import { Pagination } from "@/components/ui/pagination";
 import { Users } from "lucide-react";
 import type { Program } from "@/app/generated/prisma/client";
 import { getFacultyManagedPrograms, directoryAlumniProgramFilter } from "@/lib/faculty-scope";
+import { BRAND } from "@/lib/brand";
+import { appEmptyState, appFilterBox, appPageSubtitle, appPageTitle, appPanel } from "@/lib/app-ui";
 
 export const metadata = { title: "Alumni Directory" };
 
@@ -86,25 +89,28 @@ export default async function AlumniDirectoryPage({
   const { alumni, total, page, totalPages } = await getAlumni(params, managedPrograms);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Alumni Directory</h1>
-        <p className="mt-1 text-gray-500">
-          {total.toLocaleString()} verified alumni · IOE Purwanchal Campus
+    <div className="mx-auto max-w-7xl space-y-6">
+      <div className={`${appPanel} px-5 py-6 sm:px-8`}>
+        <h1 className={appPageTitle}>Alumni directory</h1>
+        <p className={appPageSubtitle}>
+          {total.toLocaleString()} verified alumni · {BRAND.institutionShort}
         </p>
         {session.user.role === "FACULTY" && (managedPrograms?.length ?? 0) > 0 && (
-          <p className="mt-1 text-xs text-indigo-600">
+          <p className="mt-2 text-xs text-teal-400/90">
             Showing programs you manage: {managedPrograms!.join(", ")}
           </p>
         )}
       </div>
 
-      <div className="flex gap-6">
-        {/* Filters sidebar */}
+      <div className="flex flex-col gap-0 lg:flex-row lg:gap-8">
+        <AlumniFiltersMobile
+          searchParams={params}
+          allowedPrograms={managedPrograms === null ? undefined : managedPrograms}
+        />
+
         <aside className="hidden w-56 shrink-0 lg:block">
-          <div className="rounded-xl border bg-white p-4 shadow-sm">
-            <p className="mb-4 text-sm font-semibold text-gray-700">Filters</p>
+          <div className={appFilterBox}>
+            <p className="mb-4 text-sm font-semibold text-zinc-300">Filters</p>
             <AlumniFilters
               searchParams={params}
               allowedPrograms={managedPrograms === null ? undefined : managedPrograms}
@@ -112,13 +118,12 @@ export default async function AlumniDirectoryPage({
           </div>
         </aside>
 
-        {/* Main grid */}
-        <div className="flex-1 min-w-0 space-y-5">
+        <div className="min-w-0 flex-1 space-y-5">
           {alumni.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border bg-white py-24 text-center">
-              <Users className="mb-4 h-12 w-12 text-gray-200" />
-              <h2 className="text-lg font-semibold text-gray-500">No alumni found</h2>
-              <p className="mt-1 text-sm text-gray-400">Try adjusting your filters.</p>
+            <div className={appEmptyState}>
+              <Users className="mb-4 h-12 w-12 text-zinc-600" aria-hidden />
+              <h2 className="text-lg font-semibold text-zinc-300">No alumni found</h2>
+              <p className="mt-1 text-sm text-zinc-500">Try adjusting your filters.</p>
             </div>
           ) : (
             <>
@@ -140,11 +145,7 @@ export default async function AlumniDirectoryPage({
                 ))}
               </div>
 
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                buildUrl={(p) => buildUrl(params, p)}
-              />
+              <Pagination page={page} totalPages={totalPages} buildUrl={(p) => buildUrl(params, p)} />
             </>
           )}
         </div>

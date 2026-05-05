@@ -68,9 +68,10 @@ export async function toggleJobActive(jobId: string) {
   const job = await db.jobPosting.findUnique({ where: { id: jobId }, select: { postedById: true, isActive: true } });
   if (!job) return { error: "Job not found." };
 
-  const role = session.user.role;
-  if (job.postedById !== session.user.id && role !== "ADMIN" && role !== "FACULTY") {
-    return { error: "Not authorized." };
+  const isPoster = job.postedById === session.user.id;
+  const isAdmin = session.user.role === "ADMIN";
+  if (!isPoster && !isAdmin) {
+    return { error: "Only the job poster or an admin can close or reopen this listing." };
   }
 
   await db.jobPosting.update({ where: { id: jobId }, data: { isActive: !job.isActive } });
@@ -78,4 +79,10 @@ export async function toggleJobActive(jobId: string) {
   revalidatePath("/jobs");
   revalidatePath(`/jobs/${jobId}`);
   return { success: true };
+}
+
+export async function toggleJobActiveFromForm(formData: FormData): Promise<void> {
+  const jobId = formData.get("jobId");
+  if (typeof jobId !== "string" || !jobId) return;
+  await toggleJobActive(jobId);
 }

@@ -1,132 +1,48 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import {
-  LayoutDashboard,
-  Users,
-  Briefcase,
-  Calendar,
-  BarChart3,
-  UserCircle,
-  ShieldCheck,
-  GraduationCap,
-  Megaphone,
-  UserCog,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/app/generated/prisma/client";
-
-type NavItem = {
-  label: string;
-  href: string;
-  icon: React.ElementType;
-  roles: string[];
-  exact?: boolean;
-};
-
-const navItems: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    roles: ["ALUMNI", "STUDENT", "ADMIN", "FACULTY"],
-  },
-  {
-    label: "Alumni Directory",
-    href: "/alumni",
-    icon: Users,
-    roles: ["ALUMNI", "STUDENT", "ADMIN", "FACULTY"],
-  },
-  {
-    label: "Jobs & Internships",
-    href: "/jobs",
-    icon: Briefcase,
-    roles: ["ALUMNI", "STUDENT", "ADMIN", "FACULTY"],
-  },
-  {
-    label: "Events",
-    href: "/events",
-    icon: Calendar,
-    roles: ["ALUMNI", "STUDENT", "ADMIN", "FACULTY"],
-  },
-  {
-    label: "My Profile",
-    href: "/profile",
-    icon: UserCircle,
-    roles: ["ALUMNI", "STUDENT", "ADMIN", "FACULTY"],
-  },
-  {
-    label: "Analytics",
-    href: "/admin/analytics",
-    icon: BarChart3,
-    roles: ["ADMIN", "FACULTY"],
-  },
-  {
-    label: "Announcements",
-    href: "/admin/announcements",
-    icon: Megaphone,
-    roles: ["ADMIN", "FACULTY"],
-  },
-  {
-    label: "Admin Panel",
-    href: "/admin",
-    icon: ShieldCheck,
-    roles: ["ADMIN", "FACULTY"],
-    exact: true, // sub-paths have their own nav items; don't stay active for /admin/*
-  },
-  {
-    label: "Faculty access",
-    href: "/admin/faculty-programs",
-    icon: UserCog,
-    roles: ["ADMIN"],
-  },
-];
+import { navItemsForRole } from "@/lib/nav-config";
+import { BrandLogoWithLabel } from "@/components/brand/BrandLogo";
 
 export function Sidebar({ serverRole }: { serverRole: Role }) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  // Client session is often undefined on first paint while useSession() loads; use server role until then
   const role: Role = (session?.user?.role as Role | undefined) ?? serverRole;
 
-  const visibleItems = navItems.filter((item) => item.roles.includes(role));
+  const visibleItems = navItemsForRole(role);
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r bg-white lg:flex lg:flex-col">
-      {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-          <GraduationCap className="h-4 w-4 text-white" />
-        </div>
-        <div>
-          <div className="text-sm font-bold text-gray-900">Alumni Portal</div>
-          <div className="text-xs text-gray-400">IOE Purwanchal Campus</div>
-        </div>
-      </div>
+    <aside className="relative z-10 hidden w-64 shrink-0 flex-col border-r border-white/[0.06] bg-zinc-950/80 backdrop-blur-xl lg:flex">
+      <Link
+        href="/dashboard"
+        className="flex h-16 items-center gap-3 border-b border-white/[0.06] px-5 transition-opacity hover:opacity-90"
+      >
+        <BrandLogoWithLabel tone="dark" />
+      </Link>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
         {visibleItems.map((item) => {
           const Icon = item.icon;
           const isActive =
-            pathname === item.href ||
-            (!item.exact && pathname.startsWith(item.href + "/"));
+            pathname === item.href || (!item.exact && pathname.startsWith(item.href + "/"));
 
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                 isActive
-                  ? "bg-indigo-50 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-gradient-to-r from-teal-500/25 to-emerald-600/10 text-white shadow-sm ring-1 ring-teal-400/25"
+                  : "text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-100",
               )}
             >
               <Icon
-                className={cn("h-4 w-4 shrink-0", isActive ? "text-indigo-600" : "text-gray-400")}
+                className={cn("h-4 w-4 shrink-0", isActive ? "text-teal-300" : "text-zinc-500")}
               />
               {item.label}
             </Link>
@@ -134,11 +50,12 @@ export function Sidebar({ serverRole }: { serverRole: Role }) {
         })}
       </nav>
 
-      {/* Role badge */}
-      <div className="border-t p-4">
-        <div className="rounded-md bg-gray-50 px-3 py-2 text-center text-xs text-gray-400">
+      <div className="border-t border-white/[0.06] p-4">
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.04] px-3 py-2.5 text-center text-[11px] text-zinc-500">
           Signed in as{" "}
-          <span className="font-semibold text-gray-600">{role.charAt(0) + role.slice(1).toLowerCase()}</span>
+          <span className="font-semibold text-zinc-200">
+            {role.charAt(0) + role.slice(1).toLowerCase()}
+          </span>
         </div>
       </div>
     </aside>

@@ -37,21 +37,25 @@ export function VerifyButtons({ profileId }: Props) {
       <Button
         size="sm"
         variant="outline"
-        className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+        className="border-teal-500/40 bg-teal-950/40 text-teal-100 hover:bg-teal-900/50"
         onClick={handleVerify}
         disabled={isPending}
       >
-        {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="mr-1 h-3.5 w-3.5" />}
+        {isPending ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+        ) : (
+          <CheckCircle2 className="mr-1 h-3.5 w-3.5" aria-hidden />
+        )}
         Verify
       </Button>
       <Button
         size="sm"
         variant="outline"
-        className="border-red-300 text-red-600 hover:bg-red-50"
+        className="border-red-500/35 bg-red-950/30 text-red-200 hover:bg-red-950/50"
         onClick={handleReject}
         disabled={isPending}
       >
-        <XCircle className="mr-1 h-3.5 w-3.5" />
+        <XCircle className="mr-1 h-3.5 w-3.5" aria-hidden />
         Reject
       </Button>
     </div>

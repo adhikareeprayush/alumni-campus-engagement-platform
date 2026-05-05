@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { createEvent } from "@/lib/actions/events";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { appButtonOutline, appGhostBtn, appInput, appPanel, appSelect, appTextarea } from "@/lib/app-ui";
+import { cn } from "@/lib/utils";
 
 const EVENT_TYPES = [
   { value: "GUEST_LECTURE", label: "Guest Lecture" },
@@ -54,27 +56,38 @@ export default function NewEventPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <Button variant="ghost" size="sm" asChild>
+      <Button variant="ghost" size="sm" asChild className={cn("-ml-1", appGhostBtn)}>
         <Link href="/admin"><ArrowLeft className="mr-1 h-4 w-4" /> Back to admin</Link>
       </Button>
 
-      <Card>
+      <Card className={appPanel}>
         <CardHeader>
-          <CardTitle>Create Event</CardTitle>
-          <CardDescription>Create a guest lecture, reunion, webinar, or workshop.</CardDescription>
+          <CardTitle className="text-zinc-50">Create Event</CardTitle>
+          <CardDescription className="text-zinc-500">
+            Create a guest lecture, reunion, webinar, or workshop.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
-              <Label htmlFor="title">Event Title *</Label>
-              <Input id="title" name="title" required placeholder="Annual Alumni Reunion 2026" disabled={isPending} />
+              <Label htmlFor="title" className="text-zinc-400">
+                Event Title *
+              </Label>
+              <Input
+                id="title"
+                name="title"
+                required
+                placeholder="Annual Alumni Reunion 2026"
+                disabled={isPending}
+                className={appInput}
+              />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label>Event Type *</Label>
+                <Label className="text-zinc-400">Event Type *</Label>
                 <Select value={eventType} onValueChange={setEventType} required>
-                  <SelectTrigger>
+                  <SelectTrigger className={appSelect}>
                     <SelectValue placeholder="Select type..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -85,52 +98,97 @@ export default function NewEventPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="venue">Venue</Label>
-                <Input id="venue" name="venue" placeholder="IOE Purwanchal Campus Auditorium" disabled={isPending} />
+                <Label htmlFor="venue" className="text-zinc-400">
+                  Venue
+                </Label>
+                <Input
+                  id="venue"
+                  name="venue"
+                  placeholder="Sterling Auditorium · MVTU"
+                  disabled={isPending}
+                  className={appInput}
+                />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="onlineLink">Online Join Link</Label>
-              <Input id="onlineLink" name="onlineLink" type="url" placeholder="https://meet.google.com/..." disabled={isPending} />
+              <Label htmlFor="onlineLink" className="text-zinc-400">
+                Online Join Link
+              </Label>
+              <Input
+                id="onlineLink"
+                name="onlineLink"
+                type="url"
+                placeholder="https://meet.google.com/..."
+                disabled={isPending}
+                className={appInput}
+              />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="startDate">Start Date & Time *</Label>
-                <Input id="startDate" name="startDate" type="datetime-local" required disabled={isPending} />
+                <Label htmlFor="startDate" className="text-zinc-400">
+                  Start Date & Time *
+                </Label>
+                <Input
+                  id="startDate"
+                  name="startDate"
+                  type="datetime-local"
+                  required
+                  disabled={isPending}
+                  className={appInput}
+                />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="endDate">End Date & Time</Label>
-                <Input id="endDate" name="endDate" type="datetime-local" disabled={isPending} />
+                <Label htmlFor="endDate" className="text-zinc-400">
+                  End Date & Time
+                </Label>
+                <Input id="endDate" name="endDate" type="datetime-local" disabled={isPending} className={appInput} />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="description">Description</Label>
-              <Textarea id="description" name="description" placeholder="What's this event about?" rows={4} disabled={isPending} />
+              <Label htmlFor="description" className="text-zinc-400">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="What's this event about?"
+                rows={4}
+                disabled={isPending}
+                className={cn(appTextarea, "min-h-[100px]")}
+              />
             </div>
 
-            <div className="flex items-center gap-3 rounded-lg border p-3">
+            <div className="flex items-center gap-3 rounded-lg border border-zinc-700/50 bg-zinc-900/30 p-3">
               <input
                 type="checkbox"
                 id="isPublished"
                 checked={isPublished}
                 onChange={(e) => setIsPublished(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-zinc-600 bg-zinc-900 accent-teal-600"
                 disabled={isPending}
               />
               <div>
-                <label htmlFor="isPublished" className="text-sm font-medium cursor-pointer">Publish immediately</label>
-                <p className="text-xs text-gray-400">Alumni will be able to see and RSVP this event.</p>
+                <label htmlFor="isPublished" className="cursor-pointer text-sm font-medium text-zinc-200">
+                  Publish immediately
+                </label>
+                <p className="text-xs text-zinc-500">Alumni will be able to see and RSVP this event.</p>
               </div>
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700" disabled={isPending || !eventType}>
+              <Button type="submit" className="bg-teal-600 hover:bg-teal-500" disabled={isPending || !eventType}>
                 {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : isPublished ? "Publish Event" : "Save Draft"}
               </Button>
-              <Button type="button" variant="outline" onClick={() => router.push("/admin")} disabled={isPending}>
+              <Button
+                type="button"
+                variant="outline"
+                className={appButtonOutline}
+                onClick={() => router.push("/admin")}
+                disabled={isPending}
+              >
                 Cancel
               </Button>
             </div>

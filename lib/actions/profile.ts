@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { BRAND } from "@/lib/brand";
 
 async function getAlumniProfileId(userId: string) {
   const profile = await db.alumniProfile.findUnique({ where: { userId }, select: { id: true } });
@@ -21,7 +22,7 @@ const basicInfoSchema = z.object({
   currentLocation: z.string().max(120).optional(),
   district: z.string().max(80).optional(),
   province: z.string().max(80).optional(),
-  country: z.string().max(80).default("Nepal"),
+  country: z.string().max(80).default(BRAND.homeCountry),
   bio: z.string().max(1000).optional(),
   linkedinUrl: z.string().url().optional().or(z.literal("")),
   githubUrl: z.string().url().optional().or(z.literal("")),

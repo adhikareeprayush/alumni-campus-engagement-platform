@@ -9,6 +9,8 @@ import { SkillsSection } from "@/components/profile/SkillsSection";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { appGhostBtn, appPageSubtitle, appPageTitle, appPanel } from "@/lib/app-ui";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Edit Profile" };
 
@@ -31,7 +33,7 @@ export default async function ProfileEditPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="ghost" size="sm" asChild className={cn("-ml-1", appGhostBtn)}>
           <Link href="/profile">
             <ArrowLeft className="mr-1 h-4 w-4" />
             Back to profile
@@ -40,15 +42,17 @@ export default async function ProfileEditPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
-        <p className="mt-1 text-sm text-gray-500">Keep your information up to date.</p>
+        <h1 className={appPageTitle}>Edit Profile</h1>
+        <p className={cn(appPageSubtitle, "mt-1")}>Keep your information up to date.</p>
       </div>
 
       {/* Basic info */}
-      <Card>
+      <Card className={appPanel}>
         <CardHeader>
-          <CardTitle className="text-base">Basic Information</CardTitle>
-          <CardDescription>Your professional summary and location.</CardDescription>
+          <CardTitle className="text-base text-zinc-50">Basic Information</CardTitle>
+          <CardDescription className="text-zinc-500">
+            Your professional summary and location.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <BasicInfoForm profile={profile} />
@@ -56,36 +60,35 @@ export default async function ProfileEditPage() {
       </Card>
 
       {/* Work experience */}
-      <Card>
+      <Card className={appPanel}>
         <CardHeader>
-          <CardTitle className="text-base">Work Experience</CardTitle>
-          <CardDescription>Add or update your career history.</CardDescription>
+          <CardTitle className="text-base text-zinc-50">Work Experience</CardTitle>
+          <CardDescription className="text-zinc-500">Add or update your career history.</CardDescription>
         </CardHeader>
         <CardContent>
-          <JobHistorySection profileId={profile.id} jobs={profile.jobHistory} />
+          <JobHistorySection jobs={profile.jobHistory} />
         </CardContent>
       </Card>
 
       {/* Education */}
-      <Card>
+      <Card className={appPanel}>
         <CardHeader>
-          <CardTitle className="text-base">Education</CardTitle>
-          <CardDescription>Your academic background.</CardDescription>
+          <CardTitle className="text-base text-zinc-50">Education</CardTitle>
+          <CardDescription className="text-zinc-500">Your academic background.</CardDescription>
         </CardHeader>
         <CardContent>
-          <EducationSection profileId={profile.id} education={profile.education} />
+          <EducationSection education={profile.education} />
         </CardContent>
       </Card>
 
       {/* Skills */}
-      <Card>
+      <Card className={appPanel}>
         <CardHeader>
-          <CardTitle className="text-base">Skills</CardTitle>
-          <CardDescription>Technical and professional skills.</CardDescription>
+          <CardTitle className="text-base text-zinc-50">Skills</CardTitle>
+          <CardDescription className="text-zinc-500">Technical and professional skills.</CardDescription>
         </CardHeader>
         <CardContent>
           <SkillsSection
-            profileId={profile.id}
             skills={profile.skills.map((s) => ({ id: s.skillId, name: s.skill.name }))}
           />
         </CardContent>

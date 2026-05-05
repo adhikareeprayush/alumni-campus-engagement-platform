@@ -6,14 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { addSkill, removeSkill } from "@/lib/actions/profile";
+import { appButtonOutline, appInput } from "@/lib/app-ui";
+import { cn } from "@/lib/utils";
 import { Plus, X, Loader2 } from "lucide-react";
 
 interface Props {
-  profileId: string;
   skills: { id: string; name: string }[];
 }
 
-export function SkillsSection({ profileId: _profileId, skills: initialSkills }: Props) {
+export function SkillsSection({ skills: initialSkills }: Props) {
   const [skills, setSkills] = useState(initialSkills);
   const [input, setInput] = useState("");
   const [showInput, setShowInput] = useState(false);
@@ -54,13 +55,17 @@ export function SkillsSection({ profileId: _profileId, skills: initialSkills }: 
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
         {skills.map((skill) => (
-          <Badge key={skill.id} variant="secondary" className="gap-1 pr-1 py-1 text-sm">
+          <Badge
+            key={skill.id}
+            variant="outline"
+            className="gap-1 border-zinc-600 bg-zinc-800/60 py-1 pr-1 text-sm text-zinc-200 hover:bg-zinc-800/60"
+          >
             {skill.name}
             <button
               type="button"
               onClick={() => handleRemove(skill.id, skill.name)}
               disabled={isPending}
-              className="ml-1 rounded-full p-0.5 hover:bg-gray-200 focus:outline-none"
+              className="ml-1 rounded-full p-0.5 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100 focus:outline-none"
               aria-label={`Remove ${skill.name}`}
             >
               <X className="h-3 w-3" />
@@ -76,24 +81,32 @@ export function SkillsSection({ profileId: _profileId, skills: initialSkills }: 
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="e.g. React"
-              className="h-7 w-32 text-sm"
+              className={cn(appInput, "h-7 w-32 text-sm")}
               autoFocus
               disabled={isPending}
             />
-            <Button size="sm" className="h-7 bg-indigo-600 hover:bg-indigo-700 px-2" onClick={handleAdd} disabled={isPending || !input.trim()}>
+            <Button size="sm" className="h-7 bg-teal-600 hover:bg-teal-500 px-2" onClick={handleAdd} disabled={isPending || !input.trim()}>
               {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
             </Button>
-            <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => { setShowInput(false); setInput(""); }}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+              onClick={() => {
+                setShowInput(false);
+                setInput("");
+              }}
+            >
               <X className="h-3 w-3" />
             </Button>
           </div>
         ) : (
-          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setShowInput(true)}>
+          <Button variant="outline" size="sm" className={cn(appButtonOutline, "h-7 text-xs")} onClick={() => setShowInput(true)}>
             <Plus className="mr-1 h-3 w-3" /> Add skill
           </Button>
         )}
       </div>
-      <p className="text-xs text-muted-foreground">Press Enter to add. Click × to remove.</p>
+      <p className="text-xs text-zinc-500">Press Enter to add. Click × to remove.</p>
     </div>
   );
 }

@@ -42,5 +42,8 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)"],
+  // Exclude static assets, legacy `/icon` hits, and public brand/mark files (favicon SVG lives under `brand/`).
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|icon|brand/|uploads/|.*\\.png$).*)",
+  ],
 };

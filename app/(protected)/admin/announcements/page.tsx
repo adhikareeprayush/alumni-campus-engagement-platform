@@ -8,6 +8,8 @@ import { formatDate } from "@/lib/utils";
 import { Megaphone, Eye, EyeOff } from "lucide-react";
 import { AnnouncementForm } from "@/components/announcements/AnnouncementForm";
 import { AnnouncementActions } from "@/components/announcements/AnnouncementActions";
+import { appEmptyState, appPageSubtitle, appPageTitle, appPanel } from "@/lib/app-ui";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Announcements" };
 
@@ -27,25 +29,25 @@ export default async function AnnouncementsPage() {
   const published = announcements.filter((a) => a.isPublished).length;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Megaphone className="h-6 w-6 text-indigo-600" />
+          <h1 className={cn(appPageTitle, "flex items-center gap-2")}>
+            <Megaphone className="h-7 w-7 shrink-0 text-teal-400" aria-hidden />
             Announcements
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {published} published · {announcements.length - published} draft
-            {announcements.length !== published && "s"}
+          <p className={cn(appPageSubtitle, "mt-1")}>
+            {published} published · {announcements.length - published}{" "}
+            draft{announcements.length - published === 1 ? "" : "s"}
           </p>
         </div>
       </div>
 
       {/* Create form */}
-      <Card>
+      <Card className={appPanel}>
         <CardHeader className="pb-4">
-          <CardTitle className="text-base">New Announcement</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-base text-zinc-50">New Announcement</CardTitle>
+          <CardDescription className="text-zinc-500">
             Drafts are saved but not visible to alumni and students until published.
           </CardDescription>
         </CardHeader>
@@ -57,32 +59,38 @@ export default async function AnnouncementsPage() {
       {/* List */}
       <div className="space-y-3">
         {announcements.length === 0 ? (
-          <div className="rounded-xl border border-dashed py-16 text-center text-gray-400">
-            <Megaphone className="mx-auto mb-3 h-8 w-8 opacity-30" />
-            <p className="text-sm">No announcements yet. Create one above.</p>
+          <div className={`${appEmptyState} border-dashed py-16`}>
+            <Megaphone className="mx-auto mb-3 h-8 w-8 text-zinc-600" aria-hidden />
+            <p className="text-sm text-zinc-500">No announcements yet. Create one above.</p>
           </div>
         ) : (
           announcements.map((a, idx) => (
-            <Card key={a.id} className={a.isPublished ? "" : "opacity-70"}>
+            <Card key={a.id} className={cn(appPanel, !a.isPublished && "opacity-85")}>
               <CardContent className="p-5">
                 <div className="flex items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-gray-900 truncate">{a.title}</h3>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="truncate font-semibold text-zinc-50">{a.title}</h3>
                       {a.isPublished ? (
-                        <Badge variant="success" className="text-xs shrink-0">
-                          <Eye className="mr-1 h-3 w-3" /> Published
+                        <Badge
+                          variant="outline"
+                          className="shrink-0 border-teal-500/35 bg-teal-950/45 text-xs text-teal-100 hover:bg-teal-950/45"
+                        >
+                          <Eye className="mr-1 h-3 w-3" aria-hidden /> Published
                         </Badge>
                       ) : (
-                        <Badge variant="secondary" className="text-xs shrink-0">
-                          <EyeOff className="mr-1 h-3 w-3" /> Draft
+                        <Badge
+                          variant="outline"
+                          className="shrink-0 border-zinc-600 bg-zinc-800/60 text-xs text-zinc-300 hover:bg-zinc-800/60"
+                        >
+                          <EyeOff className="mr-1 h-3 w-3 opacity-80" aria-hidden /> Draft
                         </Badge>
                       )}
                     </div>
-                    <p className="mt-2 text-sm text-gray-600 line-clamp-3 whitespace-pre-line">
+                    <p className="mt-2 text-sm text-zinc-400 line-clamp-3 whitespace-pre-line">
                       {a.content}
                     </p>
-                    <p className="mt-2 text-xs text-gray-400">
+                    <p className="mt-2 text-xs text-zinc-500">
                       By {a.createdBy.name} · {formatDate(a.createdAt)}
                     </p>
                   </div>
@@ -93,7 +101,7 @@ export default async function AnnouncementsPage() {
                     content={a.content}
                   />
                 </div>
-                {idx < announcements.length - 1 && <Separator className="mt-4" />}
+                {idx < announcements.length - 1 && <Separator className="mt-4 bg-zinc-700/50" />}
               </CardContent>
             </Card>
           ))

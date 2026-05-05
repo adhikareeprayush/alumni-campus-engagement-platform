@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Plus } from "lucide-react";
 import Link from "next/link";
+import { appEmptyState, appPageSubtitle, appPageTitle, appPrimaryBtn, appTabsList, appTabsTrigger } from "@/lib/app-ui";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Events" };
 
@@ -44,39 +46,41 @@ export default async function EventsPage() {
   type RsvpStatus = "ATTENDING" | "NOT_ATTENDING" | "MAYBE";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Events</h1>
-          <p className="mt-1 text-gray-500">Guest lectures, reunions, webinars, and more.</p>
+          <h1 className={appPageTitle}>Events</h1>
+          <p className={appPageSubtitle}>Guest lectures, reunions, webinars, and more.</p>
         </div>
         {isAdmin && (
-          <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild className={appPrimaryBtn}>
             <Link href="/admin/events/new">
-              <Plus className="mr-1 h-4 w-4" /> Create Event
+              <Plus className="mr-1 h-4 w-4" aria-hidden /> Create event
             </Link>
           </Button>
         )}
       </div>
 
       <Tabs defaultValue="upcoming">
-        <TabsList>
-          <TabsTrigger value="upcoming">
+        <TabsList className={cn(appTabsList, "w-full justify-start sm:w-auto")}>
+          <TabsTrigger value="upcoming" className={appTabsTrigger}>
             Upcoming ({upcoming.length})
           </TabsTrigger>
-          <TabsTrigger value="past">
+          <TabsTrigger value="past" className={appTabsTrigger}>
             Past ({past.length})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="upcoming" className="mt-4">
+        <TabsContent value="upcoming" className="mt-4 focus-visible:outline-none">
           {upcoming.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border bg-white py-20 text-center">
-              <Calendar className="mb-4 h-12 w-12 text-gray-200" />
-              <h2 className="text-lg font-semibold text-gray-500">No upcoming events</h2>
+            <div className={appEmptyState}>
+              <Calendar className="mb-4 h-12 w-12 text-zinc-600" aria-hidden />
+              <h2 className="text-lg font-semibold text-zinc-300">No upcoming events</h2>
               {isAdmin && (
-                <p className="mt-2 text-sm text-gray-400">
-                  <Link href="/admin/events/new" className="text-indigo-600 hover:underline">Create the first event</Link>
+                <p className="mt-2 text-sm text-zinc-500">
+                  <Link href="/admin/events/new" className="text-teal-400 hover:text-teal-300 hover:underline">
+                    Create the first event
+                  </Link>
                 </p>
               )}
             </div>
@@ -102,9 +106,9 @@ export default async function EventsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="past" className="mt-4">
+        <TabsContent value="past" className="mt-4 focus-visible:outline-none">
           {past.length === 0 ? (
-            <p className="py-10 text-center text-sm text-gray-400">No past events.</p>
+            <p className="py-10 text-center text-sm text-zinc-500">No past events.</p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {past.map((event) => (

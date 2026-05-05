@@ -9,10 +9,9 @@ import { useSession } from "next-auth/react";
 interface Props {
   currentImage: string | null;
   name: string;
-  userId: string;
 }
 
-export function AvatarUpload({ currentImage, name, userId: _userId }: Props) {
+export function AvatarUpload({ currentImage, name }: Props) {
   const [preview, setPreview] = useState<string | null>(currentImage);
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,17 +58,15 @@ export function AvatarUpload({ currentImage, name, userId: _userId }: Props) {
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isPending}
-        className="h-16 w-16 rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer"
+        className="h-16 w-16 rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-zinc-950 cursor-pointer"
         title="Change profile photo"
       >
         {preview ? (
-          <img
-            src={preview}
-            alt={name}
-            className="h-full w-full object-cover"
-          />
+          // Local blob previews are not compatible with next/image without copying to a known URL.
+          // eslint-disable-next-line @next/next/no-img-element -- avatar preview after picker may be blob:
+          <img src={preview} alt={name} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-700">
+          <div className="flex h-full w-full items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-teal-200 ring-1 ring-zinc-600/50">
             {initials}
           </div>
         )}

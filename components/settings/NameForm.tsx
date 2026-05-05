@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { updateName } from "@/lib/actions/settings";
 import { Loader2, Check } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { appInput } from "@/lib/app-ui";
 
 interface Props {
   currentName: string;
@@ -38,7 +39,9 @@ export function NameForm({ currentName }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="name">Display name</Label>
+        <Label htmlFor="name" className="text-zinc-400">
+          Display name
+        </Label>
         <Input
           id="name"
           name="name"
@@ -47,16 +50,11 @@ export function NameForm({ currentName }: Props) {
           placeholder="Your full name"
           required
           disabled={isPending}
+          className={appInput}
         />
-        <p className="text-xs text-gray-400">
-          This is the name shown across the platform.
-        </p>
+        <p className="text-xs text-zinc-500">This is the name shown across the platform.</p>
       </div>
-      <Button
-        type="submit"
-        disabled={isPending || !isDirty}
-        className="bg-indigo-600 hover:bg-indigo-700"
-      >
+      <Button type="submit" disabled={isPending || !isDirty} className="bg-teal-600 hover:bg-teal-500">
         {isPending ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (

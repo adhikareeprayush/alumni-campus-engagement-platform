@@ -42,6 +42,7 @@ export async function createAnnouncement(formData: FormData) {
 
   revalidatePath("/admin/announcements");
   revalidatePath("/dashboard");
+  revalidatePath("/announcements");
   return { success: true };
 }
 
@@ -61,6 +62,7 @@ export async function toggleAnnouncementPublished(id: string) {
 
   revalidatePath("/admin/announcements");
   revalidatePath("/dashboard");
+  revalidatePath("/announcements");
   return { success: true };
 }
 
@@ -71,6 +73,7 @@ export async function deleteAnnouncement(id: string) {
 
   revalidatePath("/admin/announcements");
   revalidatePath("/dashboard");
+  revalidatePath("/announcements");
   return { success: true };
 }
 
@@ -91,5 +94,6 @@ export async function updateAnnouncement(id: string, formData: FormData) {
 
   revalidatePath("/admin/announcements");
   revalidatePath("/dashboard");
+  revalidatePath("/announcements");
   return { success: true };
 }

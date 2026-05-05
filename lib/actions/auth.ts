@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
+import { safeInternalPath } from "@/lib/utils";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -74,21 +75,40 @@ export async function loginUser(formData: {
     // `redirect: false` avoids throwing `redirect()` from the server action. On Vercel,
     // the redirect + RSC boundary could leave the session cookie unset while the client
     // still navigates — then /dashboard sends you back to /login?callbackUrl=...
+    const redirectTo = safeInternalPath(formData.callbackUrl);
+
     const result = await signIn("credentials", {
       email: formData.email,
       password: formData.password,
       redirect: false,
-      redirectTo: formData.callbackUrl ?? "/dashboard",
+      redirectTo,
     });
 
-    const url = typeof result === "string" ? result : "";
-    if (url.includes("error=CredentialsSignin") || url.includes("error=credentials")) {
-      return { error: "Invalid email or password." };
+    if (typeof result !== "string" || !result.trim()) {
+      return { error: "Sign-in did not complete. Try again." };
     }
-    if (url.includes("error=Configuration")) {
-      return { error: "Server configuration error. Check AUTH_SECRET and AUTH_URL on the host." };
+    const url = result;
+
+    let errorParam: string | null = null;
+    try {
+      const parsed = new URL(url, "https://placeholder.local");
+      errorParam = parsed.searchParams.get("error");
+    } catch {
+      if (url.includes("error=") || url.toLowerCase().includes("error%3d")) {
+        errorParam = "unknown";
+      }
     }
-    if (url.includes("error=")) {
+
+    if (errorParam) {
+      if (errorParam === "CredentialsSignin" || errorParam === "credentials") {
+        return { error: "Invalid email or password." };
+      }
+      if (errorParam === "Configuration") {
+        return {
+          error:
+            "Server configuration error. Set AUTH_SECRET and AUTH_URL on Vercel to your live site URL, then redeploy.",
+        };
+      }
       return { error: "Something went wrong. Please try again." };
     }
 

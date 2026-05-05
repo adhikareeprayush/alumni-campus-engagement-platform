@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { registerUser } from "@/lib/actions/auth";
-import { GraduationCap, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { BRAND } from "@/lib/brand";
+import { AuthShell } from "@/components/auth/AuthShell";
+import { cn } from "@/lib/utils";
 
 const PROGRAMS = [
   { value: "BCT", label: "BCT — Computer Engineering" },
@@ -25,6 +26,12 @@ const PROGRAMS = [
 
 const currentYear = new Date().getFullYear();
 const BATCH_YEARS = Array.from({ length: currentYear - 1989 }, (_, i) => currentYear - i);
+
+const inputDark =
+  "border-white/12 bg-white/[0.06] text-white placeholder:text-zinc-500 focus-visible:border-teal-400/45 focus-visible:ring-teal-400/25 focus-visible:ring-offset-0";
+
+const selectTriggerDark =
+  "h-11 rounded-xl border-white/12 bg-white/[0.06] text-zinc-100 focus:ring-teal-400/25 focus:ring-offset-0";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -58,144 +65,145 @@ export function RegisterForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 py-10">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600">
-              <GraduationCap className="h-6 w-6 text-white" />
-            </div>
+    <AuthShell
+      wide
+      title="Create an account"
+      description={
+        <>
+          Join <span className="text-zinc-200">{BRAND.siteName}</span> for {BRAND.institutionShort}.
+        </>
+      }
+      alternatePrompt="Already registered?"
+      alternateLinkText="Sign in"
+      alternateHref="/login"
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-3 text-sm text-red-100">
+            {error}
           </div>
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-          <CardDescription>Join the Alumni Portal</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 border border-red-200">
-                {error}
-              </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] p-1">
+          <button
+            type="button"
+            onClick={() => setRole("ALUMNI")}
+            className={cn(
+              "rounded-full py-2.5 text-sm font-semibold transition-all",
+              role === "ALUMNI"
+                ? "bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-950/40"
+                : "text-zinc-400 hover:text-zinc-200"
             )}
+          >
+            Alumni
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole("STUDENT")}
+            className={cn(
+              "rounded-full py-2.5 text-sm font-semibold transition-all",
+              role === "STUDENT"
+                ? "bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-950/40"
+                : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            Student
+          </button>
+        </div>
 
-            {/* Role toggle */}
-            <div className="grid grid-cols-2 gap-2 rounded-lg border p-1">
-              <button
-                type="button"
-                onClick={() => setRole("ALUMNI")}
-                className={`rounded-md py-2 text-sm font-medium transition-colors ${
-                  role === "ALUMNI"
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Alumni
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole("STUDENT")}
-                className={`rounded-md py-2 text-sm font-medium transition-colors ${
-                  role === "STUDENT"
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Current Student
-              </button>
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="name" className="text-zinc-300">
+            Full name
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            placeholder="Jordan Hayes"
+            required
+            disabled={isPending}
+            className={cn("h-11 rounded-xl", inputDark)}
+          />
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                name="name"
-                placeholder="Ram Bahadur Sharma"
-                required
-                disabled={isPending}
-              />
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-zinc-300">
+            Email
+          </Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@mvtu.demo.edu"
+            required
+            disabled={isPending}
+            className={cn("h-11 rounded-xl", inputDark)}
+          />
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@ioe.edu.np"
-                required
-                disabled={isPending}
-              />
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-zinc-300">
+            Password
+          </Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="At least 8 characters"
+            required
+            minLength={8}
+            disabled={isPending}
+            className={cn("h-11 rounded-xl", inputDark)}
+          />
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="At least 8 characters"
-                required
-                minLength={8}
-                disabled={isPending}
-              />
-            </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label className="text-zinc-300">Program</Label>
+            <Select value={program} onValueChange={setProgram} required>
+              <SelectTrigger className={selectTriggerDark}>
+                <SelectValue placeholder="Select…" />
+              </SelectTrigger>
+              <SelectContent>
+                {PROGRAMS.map((p) => (
+                  <SelectItem key={p.value} value={p.value}>
+                    {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-zinc-300">Batch year</Label>
+            <Select value={batchYear} onValueChange={setBatchYear} required>
+              <SelectTrigger className={selectTriggerDark}>
+                <SelectValue placeholder="Year…" />
+              </SelectTrigger>
+              <SelectContent>
+                {BATCH_YEARS.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Program</Label>
-                <Select value={program} onValueChange={setProgram} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROGRAMS.map((p) => (
-                      <SelectItem key={p.value} value={p.value}>
-                        {p.value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Batch Year</Label>
-                <Select value={batchYear} onValueChange={setBatchYear} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Year..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BATCH_YEARS.map((y) => (
-                      <SelectItem key={y} value={String(y)}>
-                        {y}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-3">
-            <Button
-              type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
-              disabled={isPending || !program || !batchYear}
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                "Create account"
-              )}
-            </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link href="/login" className="font-medium text-indigo-600 hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+        <Button
+          type="submit"
+          disabled={isPending || !program || !batchYear}
+          className="h-12 w-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-600 font-semibold text-white shadow-lg shadow-teal-950/50 transition-opacity hover:opacity-[0.96] disabled:opacity-40"
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating account…
+            </>
+          ) : (
+            "Create account"
+          )}
+        </Button>
+      </form>
+    </AuthShell>
   );
 }

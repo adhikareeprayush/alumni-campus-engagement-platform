@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { addJobHistory, updateJobHistory, deleteJobHistory } from "@/lib/actions/profile";
 import { Plus, Pencil, Trash2, Loader2, Briefcase } from "lucide-react";
+import { appButtonOutline, appDialogContent, appInput, appTextarea } from "@/lib/app-ui";
+import { cn } from "@/lib/utils";
 
 type Job = {
   id: string;
@@ -26,7 +28,6 @@ type Job = {
 };
 
 interface Props {
-  profileId: string;
   jobs: Job[];
 }
 
@@ -68,40 +69,98 @@ function JobForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="jobTitle">Job Title *</Label>
-          <Input id="jobTitle" name="jobTitle" defaultValue={initial?.jobTitle} required placeholder="Software Engineer" disabled={isPending} />
+          <Label htmlFor="jobTitle" className="text-zinc-400">
+            Job Title *
+          </Label>
+          <Input
+            id="jobTitle"
+            name="jobTitle"
+            defaultValue={initial?.jobTitle}
+            required
+            placeholder="Software Engineer"
+            disabled={isPending}
+            className={appInput}
+          />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="company">Company *</Label>
-          <Input id="company" name="company" defaultValue={initial?.company} required placeholder="Leapfrog Technology" disabled={isPending} />
+          <Label htmlFor="company" className="text-zinc-400">
+            Company *
+          </Label>
+          <Input
+            id="company"
+            name="company"
+            defaultValue={initial?.company}
+            required
+            placeholder="Arcvolt Labs"
+            disabled={isPending}
+            className={appInput}
+          />
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="location">Location</Label>
-        <Input id="location" name="location" defaultValue={initial?.location ?? ""} placeholder="Kathmandu, Nepal" disabled={isPending} />
+        <Label htmlFor="location" className="text-zinc-400">
+          Location
+        </Label>
+        <Input
+          id="location"
+          name="location"
+          defaultValue={initial?.location ?? ""}
+          placeholder="Austin, TX"
+          disabled={isPending}
+          className={appInput}
+        />
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="startDate">Start Date *</Label>
-          <Input id="startDate" name="startDate" type="date" defaultValue={toInputDate(initial?.startDate ?? null)} required disabled={isPending} />
+          <Label htmlFor="startDate" className="text-zinc-400">
+            Start Date *
+          </Label>
+          <Input
+            id="startDate"
+            name="startDate"
+            type="date"
+            defaultValue={toInputDate(initial?.startDate ?? null)}
+            required
+            disabled={isPending}
+            className={appInput}
+          />
         </div>
         {!isCurrent && (
           <div className="space-y-1.5">
-            <Label htmlFor="endDate">End Date</Label>
-            <Input id="endDate" name="endDate" type="date" defaultValue={toInputDate(initial?.endDate ?? null)} disabled={isPending} />
+            <Label htmlFor="endDate" className="text-zinc-400">
+              End Date
+            </Label>
+            <Input
+              id="endDate"
+              name="endDate"
+              type="date"
+              defaultValue={toInputDate(initial?.endDate ?? null)}
+              disabled={isPending}
+              className={appInput}
+            />
           </div>
         )}
       </div>
-      <label className="flex items-center gap-2 text-sm cursor-pointer">
-        <input type="checkbox" checked={isCurrent} onChange={(e) => setIsCurrent(e.target.checked)} className="h-4 w-4 rounded border-gray-300" />
+      <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
+        <input type="checkbox" checked={isCurrent} onChange={(e) => setIsCurrent(e.target.checked)} className="h-4 w-4 rounded border-zinc-600" />
         I currently work here
       </label>
       <div className="space-y-1.5">
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" defaultValue={initial?.description ?? ""} placeholder="Key responsibilities and achievements..." rows={3} disabled={isPending} />
+        <Label htmlFor="description" className="text-zinc-400">
+          Description
+        </Label>
+        <Textarea
+          id="description"
+          name="description"
+          defaultValue={initial?.description ?? ""}
+          placeholder="Key responsibilities and achievements..."
+          rows={3}
+          disabled={isPending}
+          className={cn(appTextarea, "min-h-[72px]")}
+        />
       </div>
       <DialogFooter>
-        <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700" disabled={isPending}>
+        <Button type="submit" className="bg-teal-600 hover:bg-teal-500" disabled={isPending}>
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
         </Button>
       </DialogFooter>
@@ -109,7 +168,7 @@ function JobForm({
   );
 }
 
-export function JobHistorySection({ profileId: _profileId, jobs: initialJobs }: Props) {
+export function JobHistorySection({ jobs: initialJobs }: Props) {
   const [jobs, setJobs] = useState(initialJobs);
   const [openAdd, setOpenAdd] = useState(false);
   const [editJob, setEditJob] = useState<Job | null>(null);
@@ -147,40 +206,60 @@ export function JobHistorySection({ profileId: _profileId, jobs: initialJobs }: 
   return (
     <div className="space-y-4">
       {jobs.length === 0 && (
-        <p className="text-sm text-gray-400">No work experience added yet.</p>
+        <p className="text-sm text-zinc-500">No work experience added yet.</p>
       )}
       {jobs.map((job, idx) => (
         <div key={job.id}>
-          {idx > 0 && <Separator className="mb-4" />}
+          {idx > 0 && <Separator className="mb-4 bg-zinc-700/50" />}
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-              <Briefcase className="h-4 w-4 text-gray-500" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-800/80">
+              <Briefcase className="h-4 w-4 text-zinc-500" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="font-medium text-gray-900">{job.jobTitle}</p>
-                {job.isCurrent && <Badge variant="success" className="text-xs">Current</Badge>}
+                <p className="font-medium text-zinc-50">{job.jobTitle}</p>
+                {job.isCurrent && (
+                  <Badge
+                    variant="outline"
+                    className="border-teal-500/35 bg-teal-950/45 text-xs text-teal-100 hover:bg-teal-950/45"
+                  >
+                    Current
+                  </Badge>
+                )}
               </div>
-              <p className="text-sm text-gray-600">{job.company}</p>
-              <p className="text-xs text-gray-400">
+              <p className="text-sm text-zinc-400">{job.company}</p>
+              <p className="text-xs text-zinc-500">
                 {formatMonthYear(job.startDate)} — {job.isCurrent ? "Present" : job.endDate ? formatMonthYear(job.endDate) : ""}
                 {job.location && ` · ${job.location}`}
               </p>
-              {job.description && <p className="mt-1 text-sm text-gray-500 line-clamp-2">{job.description}</p>}
+              {job.description && <p className="mt-1 text-sm text-zinc-500 line-clamp-2">{job.description}</p>}
             </div>
             <div className="flex gap-1 shrink-0">
               <Dialog open={editJob?.id === job.id} onOpenChange={(o) => !o && setEditJob(null)}>
                 <DialogTrigger asChild>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditJob(job)}>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+                    onClick={() => setEditJob(job)}
+                  >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>Edit Experience</DialogTitle></DialogHeader>
+                <DialogContent className={cn(appDialogContent)}>
+                  <DialogHeader>
+                    <DialogTitle className="text-zinc-50">Edit Experience</DialogTitle>
+                  </DialogHeader>
                   <JobForm initial={job} onSubmit={handleUpdate} isPending={isPending} />
                 </DialogContent>
               </Dialog>
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleDelete(job.id)} disabled={isPending}>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-red-400 hover:bg-red-500/15 hover:text-red-300"
+                onClick={() => handleDelete(job.id)}
+                disabled={isPending}
+              >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -190,12 +269,14 @@ export function JobHistorySection({ profileId: _profileId, jobs: initialJobs }: 
 
       <Dialog open={openAdd} onOpenChange={setOpenAdd}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className={appButtonOutline}>
             <Plus className="mr-1 h-3.5 w-3.5" /> Add Experience
           </Button>
         </DialogTrigger>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Add Work Experience</DialogTitle></DialogHeader>
+        <DialogContent className={cn(appDialogContent)}>
+          <DialogHeader>
+            <DialogTitle className="text-zinc-50">Add Work Experience</DialogTitle>
+          </DialogHeader>
           <JobForm onSubmit={handleAdd} isPending={isPending} />
         </DialogContent>
       </Dialog>

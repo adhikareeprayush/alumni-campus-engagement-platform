@@ -2,17 +2,22 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
+import { BRAND } from "@/lib/brand";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "Alumni Portal — IOE Purwanchal Campus",
-    template: "%s | Alumni Portal",
+    default: `${BRAND.siteName} — ${BRAND.institutionShort}`,
+    template: `%s | ${BRAND.siteName}`,
   },
-  description:
-    "The official alumni management and networking portal for IOE Purwanchal Campus, Tribhuvan University.",
+  description: BRAND.seoDescription,
+  icons: {
+    icon: [{ url: "/brand/summitlink-mark.svg", type: "image/svg+xml" }],
+    apple: "/brand/summitlink-mark.svg",
+    shortcut: "/brand/summitlink-mark.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -19,6 +19,8 @@ import {
   updateAnnouncement,
 } from "@/lib/actions/announcements";
 import { Eye, EyeOff, Pencil, Trash2, Loader2 } from "lucide-react";
+import { appButtonOutline, appDialogContent, appInput, appTextarea } from "@/lib/app-ui";
+import { cn } from "@/lib/utils";
 
 interface Props {
   id: string;
@@ -75,7 +77,7 @@ export function AnnouncementActions({ id, isPublished, title, content }: Props) 
         <Button
           size="sm"
           variant="outline"
-          className="text-xs"
+          className={cn(appButtonOutline, "text-xs")}
           onClick={handleToggle}
           disabled={isPending}
           title={isPublished ? "Unpublish" : "Publish"}
@@ -95,7 +97,7 @@ export function AnnouncementActions({ id, isPublished, title, content }: Props) 
         <Button
           size="sm"
           variant="outline"
-          className="text-xs"
+          className={cn(appButtonOutline, "text-xs")}
           onClick={() => setEditOpen(true)}
           disabled={isPending}
         >
@@ -106,7 +108,7 @@ export function AnnouncementActions({ id, isPublished, title, content }: Props) 
         <Button
           size="sm"
           variant="outline"
-          className="border-red-200 text-red-600 hover:bg-red-50 text-xs"
+          className="border-red-500/40 bg-red-950/20 text-xs text-red-300 hover:bg-red-950/35 hover:text-red-200"
           onClick={handleDelete}
           disabled={isPending}
         >
@@ -117,23 +119,28 @@ export function AnnouncementActions({ id, isPublished, title, content }: Props) 
 
       {/* Edit dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className={cn(appDialogContent, "sm:max-w-lg")}>
           <DialogHeader>
-            <DialogTitle>Edit Announcement</DialogTitle>
+            <DialogTitle className="text-zinc-50">Edit Announcement</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEdit} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label htmlFor="edit-title">Title</Label>
+              <Label htmlFor="edit-title" className="text-zinc-400">
+                Title
+              </Label>
               <Input
                 id="edit-title"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 required
                 disabled={isPending}
+                className={appInput}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="edit-content">Content</Label>
+              <Label htmlFor="edit-content" className="text-zinc-400">
+                Content
+              </Label>
               <Textarea
                 id="edit-content"
                 value={editContent}
@@ -141,7 +148,7 @@ export function AnnouncementActions({ id, isPublished, title, content }: Props) 
                 rows={5}
                 required
                 disabled={isPending}
-                className="resize-none"
+                className={cn(appTextarea, "min-h-[120px] resize-none")}
               />
             </div>
             <DialogFooter>
@@ -150,10 +157,11 @@ export function AnnouncementActions({ id, isPublished, title, content }: Props) 
                 variant="outline"
                 onClick={() => setEditOpen(false)}
                 disabled={isPending}
+                className={appButtonOutline}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-indigo-600 hover:bg-indigo-700">
+              <Button type="submit" disabled={isPending} className="bg-teal-600 hover:bg-teal-500">
                 {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Save changes
               </Button>

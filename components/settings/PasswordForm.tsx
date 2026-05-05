@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updatePassword } from "@/lib/actions/settings";
 import { Loader2, KeyRound } from "lucide-react";
+import { appInput } from "@/lib/app-ui";
 
 export function PasswordForm() {
   const [isPending, startTransition] = useTransition();
@@ -29,7 +30,9 @@ export function PasswordForm() {
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="currentPassword">Current password</Label>
+        <Label htmlFor="currentPassword" className="text-zinc-400">
+          Current password
+        </Label>
         <Input
           id="currentPassword"
           name="currentPassword"
@@ -38,11 +41,14 @@ export function PasswordForm() {
           required
           disabled={isPending}
           autoComplete="current-password"
+          className={appInput}
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="newPassword">New password</Label>
+        <Label htmlFor="newPassword" className="text-zinc-400">
+          New password
+        </Label>
         <Input
           id="newPassword"
           name="newPassword"
@@ -51,14 +57,17 @@ export function PasswordForm() {
           required
           disabled={isPending}
           autoComplete="new-password"
+          className={appInput}
         />
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-zinc-500">
           At least 8 characters, one uppercase letter, and one number.
         </p>
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="confirmPassword">Confirm new password</Label>
+        <Label htmlFor="confirmPassword" className="text-zinc-400">
+          Confirm new password
+        </Label>
         <Input
           id="confirmPassword"
           name="confirmPassword"
@@ -67,14 +76,11 @@ export function PasswordForm() {
           required
           disabled={isPending}
           autoComplete="new-password"
+          className={appInput}
         />
       </div>
 
-      <Button
-        type="submit"
-        disabled={isPending}
-        className="bg-indigo-600 hover:bg-indigo-700"
-      >
+      <Button type="submit" disabled={isPending} className="bg-teal-600 hover:bg-teal-500">
         {isPending ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (

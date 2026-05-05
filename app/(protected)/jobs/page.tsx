@@ -4,6 +4,16 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { Button } from "@/components/ui/button";
 import { Briefcase, Plus } from "lucide-react";
 import Link from "next/link";
+import { BRAND } from "@/lib/brand";
+import {
+  appEmptyState,
+  appPageSubtitle,
+  appPageTitle,
+  appPillActive,
+  appPillIdle,
+  appPrimaryBtn,
+} from "@/lib/app-ui";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Jobs & Internships" };
 
@@ -60,54 +70,49 @@ export default async function JobsPage({
     session?.user.role === "FACULTY";
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Jobs & Internships</h1>
-          <p className="mt-1 text-gray-500">Opportunities posted by IOE Purwanchal alumni.</p>
+          <h1 className={appPageTitle}>Jobs & internships</h1>
+          <p className={appPageSubtitle}>
+            Roles shared by {BRAND.siteName} alumni and campus partners.
+          </p>
         </div>
         {canPost && (
-          <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild className={appPrimaryBtn}>
             <Link href="/jobs/new">
-              <Plus className="mr-1 h-4 w-4" /> Post a Job
+              <Plus className="mr-1 h-4 w-4" aria-hidden /> Post a job
             </Link>
           </Button>
         )}
       </div>
 
-      {/* Type filter tabs */}
       <div className="flex flex-wrap gap-2">
-        <Link
-          href="/jobs"
-          className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-            !params.type ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-600 hover:bg-gray-50"
-          }`}
-        >
+        <Link href="/jobs" className={cn(!params.type ? appPillActive : appPillIdle)}>
           All
         </Link>
         {JOB_TYPES.map((t) => (
           <Link
             key={t}
             href={`/jobs?type=${t}`}
-            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-              params.type === t ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-600 hover:bg-gray-50"
-            }`}
+            className={cn(params.type === t ? appPillActive : appPillIdle)}
           >
             {JOB_TYPE_LABEL[t]}
           </Link>
         ))}
       </div>
 
-      {/* Job grid */}
       {jobs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border bg-white py-24 text-center">
-          <Briefcase className="mb-4 h-12 w-12 text-gray-200" />
-          <h2 className="text-lg font-semibold text-gray-500">No jobs posted yet</h2>
+        <div className={appEmptyState}>
+          <Briefcase className="mb-4 h-12 w-12 text-zinc-600" aria-hidden />
+          <h2 className="text-lg font-semibold text-zinc-300">No jobs posted yet</h2>
           {canPost && (
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="mt-2 text-sm text-zinc-500">
               Be the first to{" "}
-              <Link href="/jobs/new" className="text-indigo-600 hover:underline">post an opportunity</Link>.
+              <Link href="/jobs/new" className="text-teal-400 hover:text-teal-300 hover:underline">
+                post an opportunity
+              </Link>
+              .
             </p>
           )}
         </div>

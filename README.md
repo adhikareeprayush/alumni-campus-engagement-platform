@@ -1,15 +1,51 @@
-# Alumni Tracker
+# SummitLink — Alumni & campus engagement platform
 
-Web app for **IOE Purwanchal Campus** (Tribhuvan University): alumni directory, jobs, events, announcements, and role-based areas for **alumni**, **students**, **faculty**, and **admins**.
+**SummitLink** is a demo-ready web app for **Meridian Valley Technical University (MVTU)**: verified alumni directory, jobs, events, announcements, analytics, and role-aware flows for **alumni**, **students**, **faculty**, and **admins**. Copy and seed data stay generic so you can rebrand via [`lib/brand.ts`](lib/brand.ts) and assets under [`public/brand/`](public/brand/).
 
-Stack: **Next.js 16** (App Router), **React 19**, **Prisma 7** with **MariaDB**, **NextAuth.js v5** (credentials), **Tailwind CSS 4**.
+**Stack:** Next.js 16 (App Router) · React 19 · Prisma 7 + MariaDB · NextAuth.js v5 (credentials) · Tailwind CSS 4 · Recharts (analytics).
+
+---
+
+## Project status (v1.0 scope)
+
+Core product flows in this repo are **implemented and intended for demos / internal deployments**. See [`docs/FEATURES.md`](docs/FEATURES.md) for a detailed checklist, roadmap ideas (email verification, OAuth, CI), and release hygiene.
+
+**Release sanity checks**
+
+```bash
+npm run lint
+npm run build
+```
+
+Use `npx prisma migrate deploy` (or `migrate dev` locally) after pulling schema changes.
+
+---
+
+## Features at a glance
+
+| Area | What ships |
+|------|------------|
+| **Auth & roles** | Email/password via NextAuth; roles ALUMNI, STUDENT, FACULTY, ADMIN; JWT sessions |
+| **Alumni** | Profile (bio, work history, education, skills, links), avatar upload, verification state |
+| **Students** | Academic profile (program, batch, roll) with faculty-visible edits |
+| **Staff** | Admin/Faculty staff cards + Faculty program scope for directory & tooling |
+| **Directory** | Search/filter verified alumni; scoped for faculty; profile detail pages |
+| **Jobs** | Post, browse, filter, apply; deactivate listings |
+| **Events** | Published events, RSVP, create flow for faculty/admin |
+| **Announcements** | Published feed; faculty/admin draft & publish management |
+| **Admin home** | KPIs, pending alumni verification |
+| **Faculty programs** | Admin assigns which programs each faculty account may see |
+| **Analytics** | Charts, explorer search, multi-dataset CSV export |
+| **Marketing** | Public landing with stats and CTAs |
+
+**Routing:** Authenticated app lives under `app/(protected)/` with a shared shell (sidebar + header). `/admin/*` and `/announcements` management enforce roles inside each page (faculty/admin as documented per route).
 
 ---
 
 ## Prerequisites
 
 - **Node.js** 20+ (LTS recommended)
-- **MariaDB** or **MySQL** 8+ (the app uses Prisma’s MySQL provider with the MariaDB driver adapter)
+- **MariaDB** or **MySQL** 8+ (Prisma uses the MySQL provider with the MariaDB driver adapter)
 
 ---
 
@@ -23,122 +59,122 @@ cd alumini-tracker
 npm install
 ```
 
-`postinstall` runs `prisma generate`, which emits the Prisma client into `app/generated/prisma/`.
+`postinstall` runs `prisma generate`; the client is emitted to `app/generated/prisma/`.
 
 ### 2. Environment variables
 
-Create a `.env` file in the project root (this repo ignores `.env*` in git):
+Create a `.env` in the project root (ignored by git):
 
-| Variable        | Required | Description |
-|-----------------|----------|-------------|
-| `DATABASE_URL`  | Yes      | MySQL/MariaDB connection string (see below). |
-| `AUTH_SECRET`   | Yes      | Secret for signing sessions/JWT. Generate with `openssl rand -base64 32`. |
-| `AUTH_URL`      | Deploy   | Public site URL, e.g. `https://your-domain.com` (helps NextAuth in production). |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | MySQL/MariaDB URL (below). |
+| `AUTH_SECRET` | Yes | Session/JWT signing secret (`openssl rand -base64 32`). |
+| `AUTH_URL` | Production | Public origin, e.g. `https://your-domain.com` (no trailing path). |
 
-**Vercel (or any production host):** In the project **Settings → Environment Variables**, set at least `DATABASE_URL`, **`AUTH_SECRET`** (required in production for Auth.js), and **`AUTH_URL`** to your live origin with no trailing path, e.g. `https://alumini-tracker.prayushadhikari.com.np`. Redeploy after changing env vars. If login loops back to `/login?callbackUrl=/dashboard`, the session cookie was not set — usually missing or wrong `AUTH_SECRET` / `AUTH_URL`, or the DB is unreachable from the serverless runtime (check Aiven allows connections from the internet).
+**Production hosts:** Set `DATABASE_URL`, `AUTH_SECRET`, and `AUTH_URL` in your provider’s env UI and redeploy. If login loops with `callbackUrl=/dashboard`, check secrets, `AUTH_URL`, and DB connectivity.
 
-Example `DATABASE_URL`:
+Example:
 
 ```env
 DATABASE_URL="mysql://USER:PASSWORD@localhost:3306/alumni_tracker"
 AUTH_SECRET="paste-a-long-random-string-here"
 ```
 
-Create the database (empty) before running migrations.
+Create an empty database before migrating.
 
-### 3. Database schema
-
-Apply migrations:
+### 3. Database
 
 ```bash
 npx prisma migrate deploy
 ```
 
-For local development when you change the schema, you can use:
+Local iterative work:
 
 ```bash
 npx prisma migrate dev
 ```
 
-### 4. Seed demo data (optional)
-
-Creates sample users, profiles, jobs, and events:
+### 4. Seed (optional)
 
 ```bash
 npm run seed
 ```
 
-Demo accounts — passwords are in the comment block at the top of `prisma/seed.ts` (e.g. admin `Admin@123456`, faculty `Faculty@123456`, alumni `Alumni@123456`, students `Student@123456`):
+Passwords are at the top of [`prisma/seed.ts`](prisma/seed.ts) (`Admin@123456`, `Faculty@123456`, `Alumni@123456`, `Student@123456`):
 
-| Role    | Email |
-|---------|--------|
-| Admin   | `admin@ioepurwanchal.edu.np` |
-| Faculty | `faculty@ioepurwanchal.edu.np` |
-| Alumni  | `aarav.sharma@example.com`, `priya.thapa@example.com` |
-| Student | `bibek.adhikari@example.com`, `sita.rai@example.com` |
+| Role | Example emails |
+|------|----------------|
+| Admin | `admin@mvtu.demo.edu` |
+| Faculty | `faculty@mvtu.demo.edu` |
+| Alumni (verified / pending) | `marcus.webb@example.com`, `alex.nguyen@example.com`, … |
+| Students | `jordan.hayes@example.com`, … |
 
-### 5. Run the dev server
+### 5. Develop
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Sign in at `/login` after seeding (or register at `/register`).
+Open [http://localhost:3000](http://localhost:3000). Sign in at `/login` or register at `/register`.
 
 ---
 
 ## npm scripts
 
-| Script        | Purpose |
-|---------------|---------|
-| `npm run dev` | Next.js development server |
-| `npm run build` | `prisma generate` then production build |
-| `npm run start` | Start production server (after `build`) |
+| Script | Purpose |
+|--------|---------|
+| `npm run dev` | Next dev server |
+| `npm run build` | `prisma generate` + production build |
+| `npm run start` | Production server (after `build`) |
 | `npm run lint` | ESLint |
-| `npm run seed` | Run `prisma/seed.ts` |
+| `npm run seed` | `tsx prisma/seed.ts` |
 
 ---
 
-## Project layout (short)
+## Repo layout
 
 | Path | Role |
 |------|------|
-| `app/` | Routes, layouts, API routes (`app/api/...`) |
-| `components/` | UI and feature components |
-| `lib/` | Auth (`lib/auth.ts`), DB client (`lib/db.ts`), server actions |
-| `prisma/` | `schema.prisma`, migrations, `seed.ts` |
-| `prisma.config.ts` | Prisma config (datasource URL from env) |
-| `public/uploads/avatars/` | User avatars (written at runtime; don’t commit real user files) |
+| `app/` | Routes (including `(protected)/`, `(auth)/`), API: `app/api/auth/`, `app/api/upload/` |
+| `components/` | UI primitives (`components/ui/`) and features |
+| `lib/` | Auth, DB client, actions, analytics helpers, [`lib/app-ui.ts`](lib/app-ui.ts) shared shell styles |
+| `prisma/` | Schema, migrations, [`seed.ts`](prisma/seed.ts) |
+| `prisma.config.ts` | Prisma config (datasource from env) |
+| `docs/FEATURES.md` | Feature matrix + suggested roadmap |
+| `public/brand/summitlink-mark.svg` | Logo mark; favicon wired from [`app/layout.tsx`](app/layout.tsx) |
+| `public/uploads/avatars/` | Runtime avatar storage — don’t commit real user files |
+
+---
+
+## Branding & white-label
+
+- **Logo / favicon:** replace [`public/brand/summitlink-mark.svg`](public/brand/summitlink-mark.svg) or update paths in `app/layout.tsx` and [`components/brand/BrandLogo.tsx`](components/brand/BrandLogo.tsx).
+- **Names & institution copy:** [`lib/brand.ts`](lib/brand.ts).
 
 ---
 
 ## Contributing
 
-1. **Branch** from `main` (or the default branch) using a short, descriptive name, e.g. `fix/job-deadline-validation`.
-2. **Keep changes focused** — one logical change per PR when possible.
-3. **Match existing style** — TypeScript, component patterns, and formatting. Prettier is configured (`.prettierrc`); run format if you use it locally.
-4. **Lint** before opening a PR: `npm run lint`.
-5. **Database changes** — update `prisma/schema.prisma`, run `npx prisma migrate dev`, and commit the generated migration under `prisma/migrations/`. Don’t hand-edit applied migration SQL unless you know the team’s process.
-6. **Secrets** — never commit `.env` or real credentials.
-
-### Next.js in this repo
-
-This project may use newer Next.js APIs than older tutorials. If something behaves unexpectedly, check the framework docs under `node_modules/next/dist/docs/` for the version you have installed.
+1. Branch from default with a short name (e.g. `fix/job-filter`).
+2. Keep PRs focused; match existing TypeScript and component patterns ([`.prettierrc`](.prettierrc) if you format locally).
+3. Run `npm run lint` before opening a PR.
+4. Schema changes: edit `prisma/schema.prisma`, run `npx prisma migrate dev`, commit migrations under `prisma/migrations/`.
+5. Never commit `.env` or production uploads.
 
 ---
 
 ## Troubleshooting
 
-- **`PrismaClient` / module errors** — Run `npx prisma generate` (or `npm install`, which triggers generate).
-- **DB connection errors** — Verify `DATABASE_URL`, that MariaDB/MySQL is running, and that the database exists. The adapter enables `allowPublicKeyRetrieval` for typical local setups.
-- **Auth / session issues** — Ensure `AUTH_SECRET` is set and stable across restarts in dev.
-- **`The table User does not exist` (P2021) when seeding** — Apply migrations before seed: `npx prisma migrate deploy` (or `npx prisma migrate dev` locally).
-- **Aiven / managed MySQL: `sql_require_primary_key` during migrate** — The initial migration creates `VerificationToken` with a composite primary key so it satisfies strict hosts.
-- **`Table 'User' already exists` after `migrate resolve --rolled-back`** — `resolve` does not drop tables. Run the SQL in `prisma/drop-all-for-fresh-migrate.sql` on the database (wipes data + `_prisma_migrations`), then `npx prisma migrate deploy` (no `resolve` needed). From your machine (uses `.env` `DATABASE_URL`): `npx prisma db execute --file prisma/drop-all-for-fresh-migrate.sql`. Aiven often has no in-browser SQL editor for MySQL; use that command or a desktop client (TablePlus, DBeaver, `mysql` CLI) with the host/port/user from the Aiven service **Overview**.
-- **Local DB created before the `VerificationToken` primary-key fix** — If `migrate deploy` reports the initial migration was modified after apply, either run `npx prisma migrate reset` (wipes data) or add the primary key manually, then follow [Prisma’s migration repair docs](https://www.prisma.io/docs/guides/migrate/production-troubleshooting) to align `_prisma_migrations` with the team.
+- **Prisma client errors** — `npx prisma generate` or reinstall (`postinstall` generates).
+- **DB connection** — Check `DATABASE_URL`, server running, database exists; adapter allows typical local MySQL settings.
+- **Auth** — Stable `AUTH_SECRET` across restarts.
+- **`User` table missing when seeding** — Migrate first: `npx prisma migrate deploy` or `migrate dev`.
+- **Strict managed MySQL (`sql_require_primary_key`)** — Initial migrations use composite PKs where required for hosts like Aiven.
+- **`Table 'User' already exists` after rollback resolve** — Use [`prisma/drop-all-for-fresh-migrate.sql`](prisma/drop-all-for-fresh-migrate.sql) only when intentionally wiping: `npx prisma db execute --file prisma/drop-all-for-fresh-migrate.sql`, then `migrate deploy`.
+- **VerificationToken migration drift** — `migrate reset` locally or follow [Prisma migration repair](https://www.prisma.io/docs/guides/migrate/production-troubleshooting).
 
 ---
 
 ## License
 
-Private project unless otherwise noted by the maintainers.
+Private project unless maintainers state otherwise.

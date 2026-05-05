@@ -22,13 +22,7 @@ import {
 import { BRAND } from "@/lib/brand";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { MarketingBackdrop } from "@/components/shell/MarketingBackdrop";
-
-type HomeStats = {
-  verifiedAlumni: number;
-  activeJobs: number;
-  publishedEvents: number;
-  students: number;
-};
+import type { PublicHomeStats } from "@/lib/data/public-stats";
 
 const offerings = [
   {
@@ -105,7 +99,7 @@ const faq = [
   },
 ];
 
-export function HomeMarketing({ stats }: { stats: HomeStats }) {
+export function HomeMarketing({ stats }: { stats: PublicHomeStats }) {
   const statItems = [
     { label: "Verified alumni", value: stats.verifiedAlumni },
     { label: "Open roles", value: stats.activeJobs },

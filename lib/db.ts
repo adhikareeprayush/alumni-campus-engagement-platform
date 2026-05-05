@@ -12,11 +12,16 @@ function parseDatabaseUrl(url: string) {
   /** Managed MySQL hosts typically require TLS (plain handshake fails or closes). */
   let ssl: boolean | { rejectUnauthorized?: boolean } | undefined;
 
+  const tlsInsecure =
+    process.env.DATABASE_SSL_INSECURE === "true" ||
+    process.env.DATABASE_SSL_INSECURE === "1" ||
+    process.env.DATABASE_SSL_REJECT_UNAUTHORIZED === "false";
+
   const envSsl = process.env.DATABASE_SSL?.toLowerCase();
   if (envSsl === "false" || envSsl === "0") {
     ssl = undefined;
   } else if (envSsl === "true" || envSsl === "1") {
-    ssl = { rejectUnauthorized: true };
+    ssl = { rejectUnauthorized: !tlsInsecure };
   } else {
     const explicitOff =
       sslMode === "DISABLED" ||
@@ -36,9 +41,11 @@ function parseDatabaseUrl(url: string) {
       /\.aiven\.io$/i.test(parsed.hostname);
 
     if (!explicitOff && (explicitOn || managedTlsHost)) {
-      ssl = { rejectUnauthorized: true };
+      ssl = { rejectUnauthorized: !tlsInsecure };
     }
   }
+
+  const connectTimeoutMs = Number.parseInt(process.env.DATABASE_CONNECT_TIMEOUT_MS ?? "30000", 10);
 
   return {
     host: parsed.hostname,
@@ -46,6 +53,7 @@ function parseDatabaseUrl(url: string) {
     user: parsed.username,
     password: parsed.password,
     database,
+    connectTimeout: Number.isFinite(connectTimeoutMs) ? connectTimeoutMs : 30000,
     ...(ssl ? { ssl } : {}),
   };
 }

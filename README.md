@@ -167,6 +167,7 @@ Open [http://localhost:3000](http://localhost:3000). Sign in at `/login` or regi
 
 - **Prisma client errors** — `npx prisma generate` or reinstall (`postinstall` generates).
 - **DB connection** — Check `DATABASE_URL`, server running, database exists; adapter allows typical local MySQL settings.
+- **Build fails on `/` with pool timeout / `ENOTFOUND` (managed MySQL e.g. Aiven)** — The marketing homepage loads live counts **per request** (not at build time). If build still fails elsewhere on DB calls, ensure CI/production **`DATABASE_URL`** uses the current hostname from your provider’s dashboard (Aiven hostnames can change after restores); unreachable DB during build otherwise yields Prisma pool timeouts.
 - **Auth** — Stable `AUTH_SECRET` across restarts.
 - **`User` table missing when seeding** — Migrate first: `npx prisma migrate deploy` or `migrate dev`.
 - **Strict managed MySQL (`sql_require_primary_key`)** — Initial migrations use composite PKs where required for hosts like Aiven.
